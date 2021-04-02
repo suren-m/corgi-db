@@ -1,8 +1,16 @@
 use std::io::{BufRead, BufReader, Write};
 use std::net::TcpStream;
 
+use structopt::StructOpt;
+
+#[derive(StructOpt)]
+struct Cli {
+    dest: String,
+}
 fn main() {
-    match TcpStream::connect("localhost:5007") {
+    let args = Cli::from_args();
+    println!("connecting to {}", args.dest);
+    match TcpStream::connect(args.dest) {
         Ok(mut stream) => {
             let msg = b"Who's my good dog??";
             stream.write(msg).unwrap();

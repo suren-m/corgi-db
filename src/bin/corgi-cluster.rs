@@ -2,6 +2,7 @@ use std::{
     collections::HashMap,
     io::stdin,
     process::{exit, Child, Command, Stdio},
+    thread,
 };
 use structopt::StructOpt;
 
@@ -26,34 +27,33 @@ fn main() {
     println!("spawning servers");
 
     let mut current_port = args.startingport;
-    for _ in 1..=args.nodecount {
-        let child = Command::new(serverpath)
-            .args(&[current_port.to_string()])
-            .stdout(Stdio::piped())
-            .spawn()
-            .expect("failed to execute child");
+    for id in 1..=args.nodecount {
+        thread::spawn(move || {
+            let mut child = Command::new(serverpath)
+                .args(&[current_port.to_string(), id.to_string()])
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("failed to execute child");
 
-        let name = format!("Node-{}", current_port);
-        nodes.insert(name.clone(), child);
+            let name = format!("Node-{}", current_port);
+            // nodes.insert(name.clone(), child);
+            println!("waiting on {}", name);
+            child.wait().expect("failed to wait on child");
+        });
         current_port = current_port + 1;
     }
-
-    // for (k, v) in &mut nodes {
-    //     println!("waiting on {}", k);
-    //     v.wait().expect("failed to wait on child");
-    // }
 
     loop {
         println!("type 'quit' to exit");
         let mut cmd: String = String::new();
         stdin().read_line(&mut cmd).unwrap();
 
-        if cmd == "quit" {
-            for (k, v) in &mut nodes {
-                println!("killing {}", k);
-                v.kill().expect("command wasn't running");
-            }
-            println!("..done...");
-        }
+        // if cmd == "quit" {
+        //     for (k, v) in &mut nodes {
+        //         println!("killing {}", k);
+        //         v.kill().expect("command wasn't running");
+        //     }
+        //     println!("..done...");
+        // }
     }
 }
