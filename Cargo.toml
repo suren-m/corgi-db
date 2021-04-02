@@ -4,5 +4,6 @@ members = [
   "corgi-clusterctrl",
   "corgi-server",
   "corgi-client",
+  "corgi-protocol"
 ]
 

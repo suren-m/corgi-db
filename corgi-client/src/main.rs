@@ -12,7 +12,7 @@ fn main() {
     println!("connecting to {}", args.dest);
     match TcpStream::connect(args.dest) {
         Ok(mut stream) => {
-            let msg = b"Who's my good dog??";
+            let msg = b"Get some data";
             stream.write(msg).unwrap();
 
             let br = BufReader::new(stream);
