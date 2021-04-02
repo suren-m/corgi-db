@@ -2,7 +2,7 @@ use std::io::{BufRead, BufReader, Write};
 use std::net::TcpStream;
 
 fn main() {
-    match TcpStream::connect("localhost:7878") {
+    match TcpStream::connect("localhost:5007") {
         Ok(mut stream) => {
             let msg = b"Who's my good dog??";
             stream.write(msg).unwrap();

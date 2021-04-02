@@ -1,13 +1,26 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
 use std::net::TcpListener;
 use std::net::TcpStream;
-use std::{thread, time};
+use std::{
+    env,
+    io::{BufRead, BufReader, Write},
+};
+use std::{
+    fs::File,
+    net::{Ipv4Addr, SocketAddrV4},
+};
 
 use std::{io::prelude::*, str::from_utf8};
 
 fn main() {
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+    let args: Vec<String> = env::args().collect();
+    dbg!(&args);
+    let port_num: u16 = args[1].to_owned().parse().unwrap();
+    println!("port is {}", port_num);
+    let loopback = Ipv4Addr::new(127, 0, 0, 1);
+    let socket = SocketAddrV4::new(loopback, port_num);
+    let listener = TcpListener::bind(socket).unwrap();
+    let port = listener.local_addr().unwrap();
+    println!("Listening on {}, access this port to end the program", port);
     for stream in listener.incoming() {
         let stream = stream.unwrap();
         handle_connection(stream);
