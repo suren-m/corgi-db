@@ -1,6 +1,5 @@
-use rand::prelude::*;
+use std::time;
 use std::{
-    fs::File,
     io::{stdin, BufRead, BufReader, Read, Write},
     net::{Ipv4Addr, SocketAddrV4, TcpListener, TcpStream},
     process::{exit, Command, Stdio},
@@ -11,8 +10,13 @@ use structopt::StructOpt;
 
 #[derive(StructOpt)]
 struct Cli {
+    #[structopt(default_value = "2")]
     nodecount: u8,
 
+    #[structopt(default_value = "localhost")]
+    hostname: String,
+
+    #[structopt(default_value = "5500")]
     startingport: u16,
 
     #[structopt(default_value = "./target/debug/corgi-server")]
@@ -21,12 +25,13 @@ struct Cli {
 
 struct Node {
     id: u8,
+    hostname: String,
     port: u16,
 }
 
 impl Node {
-    fn new(id: u8, port: u16) -> Self {
-        Node { id, port }
+    fn new(id: u8, hostname: String, port: u16) -> Self {
+        Node { id, hostname, port }
     }
 }
 
@@ -44,11 +49,13 @@ fn main() {
     let mut nodepool: Vec<Node> = spawn_nodes(args);
     for stream in listener.incoming() {
         let mut stream = stream.unwrap();
+        println!("request incoming from {}", stream.peer_addr().unwrap());
         if let Some(dest_node) = nodepool.pop() {
-            let dest_addr = format!("localhost:{}", dest_node.port);
+            let dest_addr = format!("{}:{}", dest_node.hostname, dest_node.port);
             handle_connection(stream, dest_addr);
             nodepool.push(dest_node);
         } else {
+            println!("All Nodes busy");
             stream
                 .write(format!("No nodes available. try again later.").as_bytes())
                 .unwrap();
@@ -67,6 +74,7 @@ fn spawn_nodes(args: Cli) -> Vec<Node> {
     let mut nodes: Vec<Node> = Vec::new();
     println!("spawning nodes");
 
+    let dest_hostname = args.hostname;
     let mut current_port = args.startingport;
     for id in 1..=args.nodecount {
         let serverpath = args.serverpath.to_owned();
@@ -82,7 +90,7 @@ fn spawn_nodes(args: Cli) -> Vec<Node> {
             child.wait().expect("failed to wait on child");
         });
 
-        nodes.push(Node::new(id, current_port));
+        nodes.push(Node::new(id, dest_hostname.clone(), current_port));
         current_port = current_port + 1;
     }
     nodes
@@ -97,10 +105,11 @@ fn handle_connection(mut stream: TcpStream, dest: String) {
     match TcpStream::connect(dest.clone()) {
         Ok(mut down_stream) => {
             let msg = b"Who's my good dog??";
+            thread::sleep(time::Duration::from_secs(5));
             down_stream.write(msg).unwrap();
 
             let br = BufReader::new(down_stream);
-            dbg!("response from downstream:{}", dest);
+            println!("response from downstream:{}", dest);
             for (_, line) in br.lines().into_iter().enumerate() {
                 if let Ok(word) = line {
                     stream.write(format!("{} \n", word).as_bytes()).unwrap();

@@ -5,6 +5,7 @@ use structopt::StructOpt;
 
 #[derive(StructOpt)]
 struct Cli {
+    #[structopt(default_value = "localhost:7878")]
     dest: String,
 }
 fn main() {

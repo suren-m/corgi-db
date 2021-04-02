@@ -32,7 +32,7 @@ fn handle_connection(mut stream: TcpStream, node_id: u16, port_num: u16) {
     let f = File::open("words").unwrap();
     let br = BufReader::new(f);
     // about 100K words
-    dbg!(
+    println!(
         "node{}:{} sending to {}",
         node_id,
         port_num,
