@@ -1,10 +1,8 @@
-[package]
-name = "corgi-db"
-version = "0.1.0"
-authors = ["suren <suren-m>"]
-edition = "2018"
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+members = [
+  "corgi-clusterctrl",
+  "corgi-server",
+  "corgi-client",
+]
 
-[dependencies]
-structopt = "0.3.13"
