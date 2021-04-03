@@ -4,6 +4,7 @@ members = [
   "local-cluster-bootstrap",
   "client",
   "control-plane",
-  "server"  
+  "server",
+  "core"  
 ]
 

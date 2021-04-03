@@ -1,5 +1,8 @@
+use core::dir_utils::expand_tilde;
 use std::{
+    fs,
     io::{self, Read},
+    path::PathBuf,
     process::{Command, Stdio},
     thread,
 };
@@ -24,23 +27,38 @@ struct Cli {
     #[structopt(default_value = "5515")]
     startingport: u16,
 
-    #[structopt(default_value = "./target/debug/corgi-server")]
-    serverpath: String,
+    #[structopt(default_value = "~/.corgi", parse(from_os_str))]
+    configpath: PathBuf,
+
+    #[structopt(default_value = "~/.corgi/data", parse(from_os_str))]
+    datapath: PathBuf,
+
+    #[structopt(default_value = "~/.cargo/bin", parse(from_os_str))]
+    serverpath: PathBuf,
 }
 
 fn main() {
     let args = Cli::from_args();
-    let node_pool = json!(spawn_nodes(args));
-    println!("{}", node_pool.to_string());
 
-    let mut file = OpenOptions::new()
+    let configpath = expand_tilde(&args.configpath).unwrap();
+    fs::create_dir_all(&configpath).unwrap();
+
+    let mut config = configpath.clone();
+    config.push("cluster.config.json");
+
+    let mut cluster_config = OpenOptions::new()
         .read(true)
         .write(true)
         .create(true)
-        .open("node_pool.json")
+        .open(&config)
         .unwrap();
 
-    file.write_all(node_pool.to_string().as_bytes()).unwrap();
+    let node_pool = json!(spawn_nodes(args));
+    println!("{}", node_pool.to_string());
+
+    cluster_config
+        .write_all(node_pool.to_string().as_bytes())
+        .unwrap();
 
     loop {
         println!("..waiting...");
@@ -57,7 +75,7 @@ fn spawn_nodes(args: Cli) -> Vec<Node> {
     let dest_hostname = args.hostname;
     let mut current_port = args.startingport;
     for id in 1..=args.nodecount {
-        let serverpath = args.serverpath.to_owned();
+        let serverpath = expand_tilde(&args.serverpath).unwrap();
         thread::spawn(move || {
             let mut child = Command::new(serverpath)
                 .args(&[current_port.to_string(), id.to_string()])
