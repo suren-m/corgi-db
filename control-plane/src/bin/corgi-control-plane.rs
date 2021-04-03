@@ -1,4 +1,4 @@
-use corgi_proxy::Node;
+use control_plane::Node;
 use rand::Rng;
 use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};

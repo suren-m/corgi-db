@@ -75,7 +75,8 @@ fn spawn_nodes(args: Cli) -> Vec<Node> {
     let dest_hostname = args.hostname;
     let mut current_port = args.startingport;
     for id in 1..=args.nodecount {
-        let serverpath = expand_tilde(&args.serverpath).unwrap();
+        let mut serverpath = expand_tilde(&args.serverpath).unwrap();
+        serverpath.push("corgi-server");
         thread::spawn(move || {
             let mut child = Command::new(serverpath)
                 .args(&[current_port.to_string(), id.to_string()])
