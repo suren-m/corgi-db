@@ -1,3 +1,4 @@
+use core::config::ClusterConfig;
 use std::net::TcpListener;
 use std::net::TcpStream;
 use std::{
@@ -29,7 +30,8 @@ fn handle_connection(mut stream: TcpStream, node_id: u16, port_num: u16) {
     stream.read(&mut incoming_buf).unwrap();
     println!("Human says: {}", from_utf8(&incoming_buf).unwrap());
 
-    let f = File::open("words").unwrap();
+    let words_file = ClusterConfig::get_words_file();
+    let f = File::open(words_file).unwrap();
     let br = BufReader::new(f);
     // about 100K words
     println!(

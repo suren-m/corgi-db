@@ -33,3 +33,6 @@ uninstall-control-plane:
 
 uninstall-local-cluster-bootstrap:
 	cargo uninstall -p local-cluster-bootstrap
+
+init-local-data:
+	cp ./words ~/.corgi/data/

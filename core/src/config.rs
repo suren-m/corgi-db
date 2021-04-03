@@ -27,4 +27,11 @@ impl ClusterConfig {
         let node_pools: Vec<Node> = serde_json::from_str(&data).unwrap();
         node_pools
     }
+
+    pub fn get_words_file() -> PathBuf {
+        let datapath = expand_tilde("~/.corgi/data").unwrap();
+        let mut words_file = datapath.clone();
+        words_file.push("words");
+        words_file
+    }
 }
