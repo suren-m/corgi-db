@@ -1,5 +1,5 @@
 [package]
-name = "corgi-server"
+name = "server"
 version = "0.1.0"
 authors = ["suren <suren-m>"]
 edition = "2018"

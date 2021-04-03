@@ -8,7 +8,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
-use corgi_cluster_bootstrapper::Node;
+use local_cluster_bootstrap::Node;
 use serde_json::json;
 use std::fs::OpenOptions;
 use structopt::StructOpt;
