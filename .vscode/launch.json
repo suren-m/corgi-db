@@ -7,35 +7,17 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'main'",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--bin=main",
-                    "--package=corgi-db"
-                ],
-                "filter": {
-                    "name": "main",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'main'",
+            "name": "Debug unit tests in library 'corgi-clusterctrl'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=main",
-                    "--package=corgi-db"
+                    "--lib",
+                    "--package=corgi-clusterctrl"
                 ],
                 "filter": {
-                    "name": "main",
-                    "kind": "bin"
+                    "name": "corgi-clusterctrl",
+                    "kind": "lib"
                 }
             },
             "args": [],
@@ -44,15 +26,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'server'",
+            "name": "Debug executable 'corgi-clusterctrl'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=server",
-                    "--package=corgi-db"
+                    "--bin=corgi-clusterctrl",
+                    "--package=corgi-clusterctrl"
                 ],
                 "filter": {
-                    "name": "server",
+                    "name": "corgi-clusterctrl",
                     "kind": "bin"
                 }
             },
@@ -62,16 +44,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'server'",
+            "name": "Debug unit tests in executable 'corgi-clusterctrl'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=server",
-                    "--package=corgi-db"
+                    "--bin=corgi-clusterctrl",
+                    "--package=corgi-clusterctrl"
                 ],
                 "filter": {
-                    "name": "server",
+                    "name": "corgi-clusterctrl",
                     "kind": "bin"
                 }
             },
@@ -81,15 +63,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'client'",
+            "name": "Debug executable 'corgi-server'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=client",
-                    "--package=corgi-db"
+                    "--bin=corgi-server",
+                    "--package=corgi-server"
                 ],
                 "filter": {
-                    "name": "client",
+                    "name": "corgi-server",
                     "kind": "bin"
                 }
             },
@@ -99,17 +81,73 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'client'",
+            "name": "Debug unit tests in executable 'corgi-server'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=client",
-                    "--package=corgi-db"
+                    "--bin=corgi-server",
+                    "--package=corgi-server"
                 ],
                 "filter": {
-                    "name": "client",
+                    "name": "corgi-server",
                     "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'corgi-client'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=corgi-client",
+                    "--package=corgi-client"
+                ],
+                "filter": {
+                    "name": "corgi-client",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'corgi-client'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=corgi-client",
+                    "--package=corgi-client"
+                ],
+                "filter": {
+                    "name": "corgi-client",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'corgi-protocol'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=corgi-protocol"
+                ],
+                "filter": {
+                    "name": "corgi-protocol",
+                    "kind": "lib"
                 }
             },
             "args": [],

@@ -1,11 +1,16 @@
-use std::time;
-use std::{
-    io::{stdin, BufRead, BufReader, Read, Write},
-    net::{Ipv4Addr, SocketAddrV4, TcpListener, TcpStream},
-    process::{exit, Command, Stdio},
-    str::from_utf8,
-    thread,
-};
+use rand::Rng;
+use tokio::io;
+use tokio::io::AsyncWriteExt;
+use tokio::net::{TcpListener, TcpStream};
+
+use futures::FutureExt;
+use std::{collections::HashMap, error::Error};
+use std::{env, net::SocketAddrV4};
+
+use corgi_clusterctrl::Node;
+use std::process::{Command, Stdio};
+use std::thread;
+
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
@@ -16,58 +21,54 @@ struct Cli {
     #[structopt(default_value = "localhost")]
     hostname: String,
 
-    #[structopt(default_value = "5500")]
+    #[structopt(default_value = "5510")]
     startingport: u16,
 
     #[structopt(default_value = "./target/debug/corgi-server")]
     serverpath: String,
 }
 
-struct Node {
-    id: u8,
-    hostname: String,
-    port: u16,
-}
-
-impl Node {
-    fn new(id: u8, hostname: String, port: u16) -> Self {
-        Node { id, hostname, port }
-    }
-}
-
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::from_args();
 
-    if args.nodecount <= 0 {
-        exit(1);
-    }
+    let listen_addr = env::args()
+        .nth(1)
+        .unwrap_or_else(|| "127.0.0.1:7878".to_string());
 
-    let loopback = Ipv4Addr::new(127, 0, 0, 1);
-    let socket = SocketAddrV4::new(loopback, 7878);
-    let listener = TcpListener::bind(socket).unwrap();
+    println!("Listening on: {}", listen_addr);
 
-    let mut nodepool: Vec<Node> = spawn_nodes(args);
-    for stream in listener.incoming() {
-        let mut stream = stream.unwrap();
-        println!("request incoming from {}", stream.peer_addr().unwrap());
-        if let Some(dest_node) = nodepool.pop() {
-            let dest_addr = format!("{}:{}", dest_node.hostname, dest_node.port);
-            handle_connection(stream, dest_addr);
-            nodepool.push(dest_node);
+    let node_pools = spawn_nodes(args);
+    let mut sticky_sessions: HashMap<String, String> = HashMap::new();
+    let mut rng = rand::thread_rng();
+
+    let listener = TcpListener::bind(listen_addr).await?;
+
+    while let Ok((inbound, caller)) = listener.accept().await {
+        let mut backend_addr = String::new();
+        let caller_addr = caller.to_string();
+        println!("Request from {}", caller_addr);
+
+        if let Some(proxy) = sticky_sessions.get(&caller_addr) {
+            backend_addr = proxy.to_owned();
+            println!("sticky session to {}", backend_addr);
         } else {
-            println!("All Nodes busy");
-            stream
-                .write(format!("No nodes available. try again later.").as_bytes())
-                .unwrap();
-            stream.flush().unwrap();
+            let rand_num = rng.gen_range(0..node_pools.len());
+            let rand_node = &node_pools[rand_num];
+            backend_addr = format!("{}:{}", rand_node.hostname, rand_node.port);
+            println!("Transfer to {}", backend_addr);
         }
+        sticky_sessions.insert(caller_addr, backend_addr.to_owned());
+        let transfer = transfer(inbound, backend_addr).map(|r| {
+            if let Err(e) = r {
+                println!("Failed to transfer; error={}", e);
+            }
+        });
+
+        tokio::spawn(transfer);
     }
 
-    loop {
-        println!("type 'quit' to exit");
-        let mut cmd: String = String::new();
-        stdin().read_line(&mut cmd).unwrap();
-    }
+    Ok(())
 }
 
 fn spawn_nodes(args: Cli) -> Vec<Node> {
@@ -96,27 +97,23 @@ fn spawn_nodes(args: Cli) -> Vec<Node> {
     nodes
 }
 
-fn handle_connection(mut stream: TcpStream, dest: String) {
-    let mut incoming_buf = [0; 512];
-    stream.read(&mut incoming_buf).unwrap();
-    println!("Human says: {}", from_utf8(&incoming_buf).unwrap());
+async fn transfer(mut inbound: TcpStream, proxy_addr: String) -> Result<(), Box<dyn Error>> {
+    let mut outbound = TcpStream::connect(proxy_addr).await?;
 
-    println!("connecting to {}", dest);
-    match TcpStream::connect(dest.clone()) {
-        Ok(mut down_stream) => {
-            let msg = b"Who's my good dog??";
-            thread::sleep(time::Duration::from_secs(5));
-            down_stream.write(msg).unwrap();
+    let (mut ri, mut wi) = inbound.split();
+    let (mut ro, mut wo) = outbound.split();
 
-            let br = BufReader::new(down_stream);
-            println!("response from downstream:{}", dest);
-            for (_, line) in br.lines().into_iter().enumerate() {
-                if let Ok(word) = line {
-                    stream.write(format!("{} \n", word).as_bytes()).unwrap();
-                    stream.flush().unwrap();
-                }
-            }
-        }
-        Err(_) => println!("can't connect"),
-    }
+    let client_to_server = async {
+        io::copy(&mut ri, &mut wo).await?;
+        wo.shutdown().await
+    };
+
+    let server_to_client = async {
+        io::copy(&mut ro, &mut wi).await?;
+        wi.shutdown().await
+    };
+
+    tokio::try_join!(client_to_server, server_to_client)?;
+
+    Ok(())
 }
