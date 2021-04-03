@@ -18,22 +18,22 @@ use structopt::StructOpt;
 
 #[derive(StructOpt)]
 struct Cli {
-    #[structopt(default_value = "2")]
+    #[structopt(short, long, default_value = "2")]
     nodecount: u8,
 
-    #[structopt(default_value = "localhost")]
+    #[structopt(short, long, default_value = "localhost")]
     hostname: String,
 
-    #[structopt(default_value = "5515")]
+    #[structopt(short, long, default_value = "5515")]
     startingport: u16,
 
-    #[structopt(default_value = "~/.corgi", parse(from_os_str))]
+    #[structopt(short, long, default_value = "~/.corgi", parse(from_os_str))]
     configpath: PathBuf,
 
-    #[structopt(default_value = "~/.corgi/data", parse(from_os_str))]
+    #[structopt(short, long, default_value = "~/.corgi/data", parse(from_os_str))]
     datapath: PathBuf,
 
-    #[structopt(default_value = "~/.cargo/bin", parse(from_os_str))]
+    #[structopt(short, long, default_value = "~/.cargo/bin", parse(from_os_str))]
     serverpath: PathBuf,
 }
 

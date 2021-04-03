@@ -17,10 +17,16 @@ use structopt::StructOpt;
 
 #[derive(StructOpt)]
 struct Cli {
-    #[structopt(default_value = "~/.corgi", parse(from_os_str))]
+    #[structopt(short, long, default_value = "127.0.0.1")]
+    hostname: String,
+
+    #[structopt(short, long, default_value = "7878")]
+    port: String,
+
+    #[structopt(short, long, default_value = "~/.corgi", parse(from_os_str))]
     configpath: PathBuf,
 
-    #[structopt(default_value = "~/.corgi/data", parse(from_os_str))]
+    #[structopt(short, long, default_value = "~/.corgi/data", parse(from_os_str))]
     datapath: PathBuf,
 }
 
@@ -31,10 +37,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("Node_Pool: {:?}", node_pool);
 
-    let listen_addr = env::args()
-        .nth(1)
-        .unwrap_or_else(|| "127.0.0.1:7878".to_string());
-
+    let listen_addr = format!("{}:{}", args.hostname, args.port);
     println!("Listening on: {}", listen_addr);
 
     let mut sticky_sessions: HashMap<String, String> = HashMap::new();
