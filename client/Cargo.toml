@@ -3,6 +3,7 @@ name = "client"
 version = "0.1.0"
 authors = ["suren <suren-m>"]
 edition = "2018"
+default-run= "corgi-client"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
