@@ -1,19 +1,35 @@
-use control_plane::Node;
 use rand::Rng;
 use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::{fs, io};
 
+use core::{
+    config::{ClusterConfig, Node},
+    dir_utils::expand_tilde,
+};
 use futures::FutureExt;
-use std::env;
 use std::{collections::HashMap, error::Error};
+use std::{env, path::PathBuf};
+
+use serde_json::json;
+use std::fs::OpenOptions;
+use structopt::StructOpt;
+
+#[derive(StructOpt)]
+struct Cli {
+    #[structopt(default_value = "~/.corgi", parse(from_os_str))]
+    configpath: PathBuf,
+
+    #[structopt(default_value = "~/.corgi/data", parse(from_os_str))]
+    datapath: PathBuf,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let data = fs::read_to_string("node_pool.json").await.unwrap();
-    let node_pools: Vec<Node> = serde_json::from_str(&data)?;
+    let args = Cli::from_args();
+    let node_pool: Vec<Node> = ClusterConfig::get_nodepool_data(&args.configpath);
 
-    println!("Node_Pool: {:?}", node_pools);
+    println!("Node_Pool: {:?}", node_pool);
 
     let listen_addr = env::args()
         .nth(1)
@@ -35,8 +51,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             backend_addr = proxy.to_owned();
             println!("sticky session to {}", backend_addr);
         } else {
-            let rand_num = rng.gen_range(0..node_pools.len());
-            let rand_node = &node_pools[rand_num];
+            let rand_num = rng.gen_range(0..node_pool.len());
+            let rand_node = &node_pool[rand_num];
             backend_addr = format!("{}:{}", rand_node.hostname, rand_node.port);
             println!("Transfer to {}", backend_addr);
         }
