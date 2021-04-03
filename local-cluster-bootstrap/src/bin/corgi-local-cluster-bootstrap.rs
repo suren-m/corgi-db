@@ -1,4 +1,4 @@
-use core::dir_utils::expand_tilde;
+use core::{config::ClusterConfig, dir_utils::expand_tilde};
 use std::{
     fs,
     io::{self, Read},
@@ -44,7 +44,7 @@ fn main() {
     fs::create_dir_all(&configpath).unwrap();
 
     let mut config = configpath.clone();
-    config.push("cluster.config.json");
+    config.push(ClusterConfig::get_config_filename());
 
     let mut cluster_config = OpenOptions::new()
         .read(true)

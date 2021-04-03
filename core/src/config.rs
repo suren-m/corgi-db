@@ -15,10 +15,13 @@ pub struct Node {
 pub struct ClusterConfig {}
 
 impl ClusterConfig {
+    pub fn get_config_filename() -> String {
+        String::from("cluster.config.json")
+    }
     pub fn get_nodepool_data(path: &PathBuf) -> Vec<Node> {
         let configpath = expand_tilde(path).unwrap();
         let mut config = configpath.clone();
-        config.push("cluster.config.json");
+        config.push(ClusterConfig::get_config_filename());
 
         let data = fs::read_to_string(config).unwrap();
         let node_pools: Vec<Node> = serde_json::from_str(&data).unwrap();
