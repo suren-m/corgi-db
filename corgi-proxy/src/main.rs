@@ -1,36 +1,19 @@
+use corgi_proxy::Node;
 use rand::Rng;
-use tokio::io;
 use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};
+use tokio::{fs, io};
 
 use futures::FutureExt;
+use std::env;
 use std::{collections::HashMap, error::Error};
-use std::{env, net::SocketAddrV4};
-
-use corgi_clusterctrl::Node;
-use std::process::{Command, Stdio};
-use std::thread;
-
-use structopt::StructOpt;
-
-#[derive(StructOpt)]
-struct Cli {
-    #[structopt(default_value = "2")]
-    nodecount: u8,
-
-    #[structopt(default_value = "localhost")]
-    hostname: String,
-
-    #[structopt(default_value = "5510")]
-    startingport: u16,
-
-    #[structopt(default_value = "./target/debug/corgi-server")]
-    serverpath: String,
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let args = Cli::from_args();
+    let data = fs::read_to_string("node_pool.json").await.unwrap();
+    let node_pools: Vec<Node> = serde_json::from_str(&data)?;
+
+    println!("Node_Pool: {:?}", node_pools);
 
     let listen_addr = env::args()
         .nth(1)
@@ -38,7 +21,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("Listening on: {}", listen_addr);
 
-    let node_pools = spawn_nodes(args);
     let mut sticky_sessions: HashMap<String, String> = HashMap::new();
     let mut rng = rand::thread_rng();
 
@@ -69,32 +51,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
-}
-
-fn spawn_nodes(args: Cli) -> Vec<Node> {
-    let mut nodes: Vec<Node> = Vec::new();
-    println!("spawning nodes");
-
-    let dest_hostname = args.hostname;
-    let mut current_port = args.startingport;
-    for id in 1..=args.nodecount {
-        let serverpath = args.serverpath.to_owned();
-        thread::spawn(move || {
-            let mut child = Command::new(serverpath)
-                .args(&[current_port.to_string(), id.to_string()])
-                .stdout(Stdio::piped())
-                .spawn()
-                .expect("failed to execute child");
-
-            let name = format!("Node-{}", current_port);
-            println!("waiting on {}", name);
-            child.wait().expect("failed to wait on child");
-        });
-
-        nodes.push(Node::new(id, dest_hostname.clone(), current_port));
-        current_port = current_port + 1;
-    }
-    nodes
 }
 
 async fn transfer(mut inbound: TcpStream, proxy_addr: String) -> Result<(), Box<dyn Error>> {

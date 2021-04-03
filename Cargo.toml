@@ -1,9 +1,9 @@
 [workspace]
 
 members = [
-  "corgi-clusterctrl",
+  "corgi-cluster-bootstrapper",
+  "corgi-proxy",
   "corgi-server",
-  "corgi-client",
-  "corgi-protocol"
+  "corgi-client"
 ]
 

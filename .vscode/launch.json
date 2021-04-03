@@ -7,16 +7,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'corgi-clusterctrl'",
+            "name": "Debug unit tests in library 'corgi-cluster-bootstrapper'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=corgi-clusterctrl"
+                    "--package=corgi-cluster-bootstrapper"
                 ],
                 "filter": {
-                    "name": "corgi-clusterctrl",
+                    "name": "corgi-cluster-bootstrapper",
                     "kind": "lib"
                 }
             },
@@ -26,15 +26,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'corgi-clusterctrl'",
+            "name": "Debug executable 'corgi-cluster-bootstrapper'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=corgi-clusterctrl",
-                    "--package=corgi-clusterctrl"
+                    "--bin=corgi-cluster-bootstrapper",
+                    "--package=corgi-cluster-bootstrapper"
                 ],
                 "filter": {
-                    "name": "corgi-clusterctrl",
+                    "name": "corgi-cluster-bootstrapper",
                     "kind": "bin"
                 }
             },
@@ -44,16 +44,72 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'corgi-clusterctrl'",
+            "name": "Debug unit tests in executable 'corgi-cluster-bootstrapper'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=corgi-clusterctrl",
-                    "--package=corgi-clusterctrl"
+                    "--bin=corgi-cluster-bootstrapper",
+                    "--package=corgi-cluster-bootstrapper"
                 ],
                 "filter": {
-                    "name": "corgi-clusterctrl",
+                    "name": "corgi-cluster-bootstrapper",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'corgi-proxy'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=corgi-proxy"
+                ],
+                "filter": {
+                    "name": "corgi-proxy",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'corgi-proxy'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=corgi-proxy",
+                    "--package=corgi-proxy"
+                ],
+                "filter": {
+                    "name": "corgi-proxy",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'corgi-proxy'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=corgi-proxy",
+                    "--package=corgi-proxy"
+                ],
+                "filter": {
+                    "name": "corgi-proxy",
                     "kind": "bin"
                 }
             },
@@ -129,25 +185,6 @@
                 "filter": {
                     "name": "corgi-client",
                     "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in library 'corgi-protocol'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--lib",
-                    "--package=corgi-protocol"
-                ],
-                "filter": {
-                    "name": "corgi-protocol",
-                    "kind": "lib"
                 }
             },
             "args": [],
