@@ -1,3 +1,4 @@
 # corgi-db
 
-![image](https://user-images.githubusercontent.com/3830633/113482231-92458680-9495-11eb-9136-3f9e1baa7d8e.png)
+![image](https://user-images.githubusercontent.com/3830633/113482605-4abffa00-9497-11eb-83a0-733de93a48f9.png)
+
