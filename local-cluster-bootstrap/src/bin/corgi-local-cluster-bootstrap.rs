@@ -25,7 +25,7 @@ struct Cli {
     hostname: String,
 
     #[structopt(short, long, default_value = "5515")]
-    startingport: u16,
+    portstart: u16,
 
     #[structopt(short, long, default_value = "~/.corgi", parse(from_os_str))]
     configpath: PathBuf,
@@ -73,7 +73,7 @@ fn spawn_nodes(args: Cli) -> Vec<Node> {
     println!("spawning nodes");
 
     let dest_hostname = args.hostname;
-    let mut current_port = args.startingport;
+    let mut current_port = args.portstart;
     for id in 1..=args.nodecount {
         let mut serverpath = expand_tilde(&args.serverpath).unwrap();
         serverpath.push("corgi-server");

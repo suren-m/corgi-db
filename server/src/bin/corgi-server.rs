@@ -42,6 +42,7 @@ fn handle_connection(mut stream: TcpStream, node_id: u16, port_num: u16) {
     );
     for (_count, line) in br.lines().into_iter().enumerate() {
         if let Ok(word) = line {
+            // dbg!("{} count=", &word, _count);
             stream.write(format!("{} \n", word).as_bytes()).unwrap();
             stream.flush().unwrap();
         }
